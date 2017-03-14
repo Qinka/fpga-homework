@@ -1,0 +1,30 @@
+\documentclass{ctexart}
+
+\title{FPGA 逻辑设计综述}
+\author{李约瀚 \\ 14130140331 \\ qinka@live.com \\ qinka@qinka.pw}
+
+
+
+\begin{document}
+\maketitle
+
+
+FPGA 是 Field Programmable Gate Array 的缩写。中文意思是“现场可编程门阵列”。在 PAL、CPLD 等器件基础上进一步研发的产物。
+FPGA 的核心内容就是“查找表”的方式控制“组成电路”。FPGA 一方面与普通的计算机程序编织相类似，可以用特定的编程语言进行编程。
+另一方面，FPGA 的思想逻辑与传统的程序有所差别，FPGA 的“信号”通常会是并行传送的，这种并行的编程思想与普通的串行程序与并行程序编织有着截然不同的方式。
+
+通常情况下，Xilinx 的FPGA使用 ISE 作为开发设计软件，其他厂商的也有相对应的设计工具。这类设计工具通常提供了 VHDL 与 Verilog 两种语言的设计方式。
+但也同时提供及时可见的拖拽方式的设计。Xilinx 的新产品中也有提供使用 C/C++ 设计的方式。同时还有将其他高级语言的设计工具 例如基于 Haskell 的 $C\lambda aSH$，
+可以将 Haskell 代码翻译成 VHDL 或者 Verilog。
+
+\paragraph{ISE Design Suite}
+
+ISE Design Suite 是为 Spartan-6，Virtex-6与CoolRunner 提供设计。 Xilinx 官方提供了新的 Vivado Design Suite 针对新一代的器件全新设计。
+ISE Design Suite 包含对 FPGA 的设计测试功能，并能灵活的将各种 IP 核组合在一起满足一定的需要。
+
+\paragraph{C\lambda aSH}
+C\lambda aSH 是一个基于函数式编程语言 Haskell 设计制作的 FPGA 逻辑设计软件。
+使用 Haskell 语言作为编程语言，提供了与 VHDL、VerilogSys 于 SystemVerilog 语言的生成功能。
+
+
+\end{document}
