@@ -135,7 +135,10 @@ endmodule
 
         \paragraph{综合与实现}
 
-        现在左侧的 \verb|Design| 面板中的 \verb|Hierarchy| 中选中创建的 HDL 源文件，在下方的双击 \verb|View RTL Schematic| 查看电路。
+		在左侧的 \verb|Design| 面板中下方中 双击 \verb|Synthesize-XST| 开始综合过程。
+		
+
+        在左侧的 \verb|Design| 面板中的 \verb|Hierarchy| 中选中创建的 HDL 源文件，在下方的双击 \verb|View RTL Schematic| 查看电路。
 
         \begin{figure}
 \centering
@@ -143,6 +146,44 @@ endmodule
 \caption[Circuit]{}
 \label{fig:report1-circiut-1}
 \end{figure}
+
+		之后添加用户约束文件，这个文件使得器件脚针与外围设备可以绑定，链接。
+		添加的方式可以在 \verb|Design| 面板中找到 带有 \verb|Pre| 前缀的 \verb|PlanAhead| 中配置脚针。或者为工程添加用户约束文件。
+		
+		用户约束文件的内容大致是配置脚针(site) 与外围设备的链接配置。
+		\begin{lstlisting}
+Net "clk"      LOC = V10;
+Net "reset"  LOC = C9;
+Net "dir_r_l" LOC = T10;
+Net "clk"      IOSTANDARD = LVCMOS33;
+Net  "reset" IOSTANDARD = LVCMOS33;
+Net "dir_r_l" IOSTANDARD = LVCMOS33;
+
+Net "led[0]" LOC = U16;
+Net "led[1]" LOC = V16;
+Net "led[2]" LOC = U15;
+Net "led[3]" LOC = V15;
+Net "led[4]" LOC = M11;
+Net "led[5]" LOC = N11;
+Net "led[6]" LOC = R11;
+Net "led[7]" LOC = T11;
+Net "led[0]" IOSTANDARD = LVCMOS33;
+Net "led[1]" IOSTANDARD = LVCMOS33;
+Net "led[2]" IOSTANDARD = LVCMOS33;
+Net "led[3]" IOSTANDARD = LVCMOS33;
+Net "led[4]" IOSTANDARD = LVCMOS33;
+Net "led[5]" IOSTANDARD = LVCMOS33;
+Net "led[6]" IOSTANDARD = LVCMOS33;
+Net "led[7]" IOSTANDARD = LVCMOS33;
+		\end{lstlisting}
+		
+		然后执行的步骤是实现。这个步骤中会执行翻译、映射、与布局布线。双击
+		\verb|Implement Design| 自动执行上述步骤。
+		
+		\paragraph{器件配置}
+		配置器件之前首先需要进行的是生成对应的配置文件。在 \verb|Design| 面板中
+		的 \verb|Generate Programming File|  双击之后会自动生成 二进制比特的配置文件。
+		之后将开发版通过USB链接到电脑后。
 
 
 \end{document}
