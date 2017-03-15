@@ -6,7 +6,7 @@
 
 \usepackage{listings}
 
-\lstset{frame=single,breaklines,numbers}
+%\lstset{frame=single,breaklines,numbers}
 
 \begin{document}
     
@@ -30,9 +30,9 @@
         % Setting
         \setcounter{page}{0}
         \setcounter{section}{0}
-        \renewcommand\thesection{实验编号 1-\numeric{section} 题目： }
-        \renewcommand\thesubsection{}
-        \renewcommand\thesubsubsection{(\numeric{subsubsection})}
+        %\renewcommand\thesection{实验编号 1-\numeric{section} 题目： }
+        %\renewcommand\thesubsection{}
+        %\renewcommand\thesubsubsection{(\numeric{subsubsection})}
 
         %% Exp 1-1
         \section{控制二极管循环发光}
@@ -137,6 +137,12 @@ endmodule
 
         现在左侧的 \verb|Design| 面板中的 \verb|Hierarchy| 中选中创建的 HDL 源文件，在下方的双击 \verb|View RTL Schematic| 查看电路。
 
-        
+        \begin{figure}
+\centering
+\includegraphics[width=0.7\linewidth]{report1-circiut-1.eps}
+\caption[Circuit]{}
+\label{fig:report1-circiut-1}
+\end{figure}
+
 
 \end{document}
