@@ -1,0 +1,173 @@
+\documentclass{ctexart}
+
+\author{李约瀚 \\ 14130140331 \\ qinka@live.com \\ qinka@qinka.pw}
+\title{FPGA设计基础实验报告 （二）}
+
+\usepackage{listings}
+
+%\lstset{frame=single,breaklines,numbers}
+
+\begin{document}
+    
+        % Cover
+        \thispagestyle{empty}
+        \begin{center}
+            \vspace*{4em}
+            {\Huge\textbf{FPGA设计基础实验报告\\\vspace*{0.5em} （二）}}
+            \vfill
+            \begin{tabular}{c@{：}l}
+                班级 & 1413014 \\
+                学号 & 14130140331 \\ 
+                姓名 & 李约瀚 \\ 
+                教师 & 沈沛意 \\
+            \end{tabular} 
+            \vspace*{4em}\\
+        \end{center}
+        \newpage
+        
+       
+        % Setting
+        \setcounter{page}{0}
+        \setcounter{section}{0}
+        %\renewcommand\thesection{实验编号 1-\numeric{section} 题目： }
+        %\renewcommand\thesubsection{}
+        %\renewcommand\thesubsubsection{(\numeric{subsubsection})}
+
+        %% Exp 2-1
+        
+        \section{数字时钟管理实验}
+        
+        \subsection{实验目的}
+        \begin{itemize}
+        \item 熟悉ISE软件，会使用ISE软件进行设计和仿真
+        \item 学会Xilinx IP核生成工具的使用
+        \item 学会数字时钟管理IP核的配置和使用
+        \end{itemize}
+
+        \subsection{实验步骤}
+
+        \begin{itemize}
+        \item 创建工程
+        \item 设计输入
+        \item 设计综合
+        \item 设计仿真
+        \end{itemize}
+
+        \subsection{报告正文}
+
+        \subsubsection{实验原理}
+
+        IP核，也就是知识产权核(\verb|Intellectual Property|)，
+        是那些己验证的、可重利用的、具有某种确定功能的IC模块。
+        分为软核(\verb|soft IP core|)、固核(\verb|firm IP core|)
+        和硬核(\verb|hard IP core|)
+
+        IP核将一些在数字电路中常用，但比较复杂的功能块，
+        如FIR滤波器、SDRAM控制器、PCI接口等设计成可修改参数的模块，
+        在设计可以直接调用，从而大大提高了设计的可重用性，
+        在数字系统设计中得到了广泛的应用。
+
+        目前，大型设计一般推荐使用同步时序电路。同步时序电路基于时钟触发沿设计，
+        对时钟的周期、占空比、延时和抖动提出了更高的要求。
+        为了满足同步时序设计的要求，一般在FPGA设计中采用全局时钟资源
+        驱动设计的主时钟，以达到最低的时钟抖动和延迟。
+       
+        Xilinx在其FPGA系列芯片中都提供了高性能数字时钟管理器（DCM）模块，
+        是管理和掌控时钟的专用模块，可以实现时钟的分频，倍频，去抖动，相移等操作。
+
+        \paragraph{新建工程}
+
+        打开 ISE 14.7之后，选择新建工程，将工程的路径设置好。
+        在单击下一步之后，选择 Nexys3 的 Spartan6 XC6SLX16-CS324 芯片对应的配置。硬件描述语言选择 Verilog，其中的设计硬件用的描述语言是 Verilog。
+        然后点击下一步之后进入工程信息页面并确认无误之后，点击完成结束工程的创建。
+
+        \paragraph{设计输入}
+
+        在菜单 \verb|Project| 中选择 \verb|New Source| 创建新的设计，并选择 \verb|Verilog Module| 创建文件。
+
+        其中输入的设计文件是:
+        \begin{lstlisting}[language=Verilog]
+`timescale 1ns / 1ps
+// Copyright (C) Xilinx
+module top(
+    input clk,
+    input reset,
+    output clk_out1,
+    output clk_out2,
+    output locked
+    );
+	 
+dcm_core dcm0
+   (// Clock in ports
+    .CLK_IN1(clk),      // IN
+    // Clock out ports
+    .CLK_OUT1(clk_out1),     // OUT
+    .CLK_OUT2(clk_out2),     // OUT
+    // Status and control signals
+    .RESET(reset),// IN
+    .LOCKED(locked));      // OUT
+
+endmodule
+        \end{lstlisting}
+
+        添加 IP 核，在菜单 \verb|Project| 中选择 \verb|New Source| 创建新的设计，并选择 \verb|IP (CORE Generator & Architecture Wizard)| 创建IP核。
+        然后再\verb|FPGA Features and Design| 中找到 \verb|Clocking Wizard| 创建时钟。在配置页面中将输入频率设置为100MHz，然后在第二个页面中设置两个时钟。频率分别是50MHz 与 200MHz。第二个时钟的相位是180度。
+
+        \paragraph{综合设计}
+
+        在左侧的 \verb|Design| 面板中下方中 双击 \verb|Synthesize-XST| 开始综合过程。
+
+        在左侧的 \verb|Design| 面板中的 \verb|Hierarchy| 中选中创建的 HDL 源文件，在下方的双击 \verb|View RTL Schematic| 查看电路。
+
+        \paragraph{设计仿真}
+        
+        为工程文件添加仿真文件。在菜单 \verb|Project| 中选择 \verb|New Source| 创建新的设计，并选择 \verb|Verilog Test Fixture| 创键测试文件。
+
+        在测试文件中添加 \lstinline|always #5 clk = ~clk;|
+        \begin{lstlisting}
+`timescale 1ns / 1ps
+
+module test_bench;
+
+	// Inputs
+	reg clk;
+	reg reset;
+
+	// Outputs
+	wire clk_out1;
+	wire clk_out2;
+	wire locked;
+
+	// Instantiate the Unit Under Test (UUT)
+	top uut (
+		.clk(clk), 
+		.reset(reset), 
+		.clk_out1(clk_out1), 
+		.clk_out2(clk_out2), 
+		.locked(locked)
+	);
+
+	initial begin
+		// Initialize Inputs
+		clk = 0;
+		reset = 0;
+
+		// Wait 100 ns for global reset to finish
+		#100;
+ 
+		// Add stimulus here
+
+	end
+	
+	always #5 clk = ~clk;
+      
+endmodule
+        \end{lstlisting}
+
+        然后在左边面板中选中\verb|Simulation|，在工程管理区选中测试代码，
+        然后在过程管理区双击\verb|Simulate Behavioral Model|
+        ，\verb|ISE|将启动\verb|ISE Simulator|，运行仿真。
+
+        \paragraph{结果}
+
+        
