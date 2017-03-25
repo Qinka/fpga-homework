@@ -131,9 +131,50 @@
         并在 SDK 打开之后将工作空间定位到工程中的
         \verb|SDK\SDK_Export| 目录下。
         
-        然后在 \verb|New| 菜单选项中选择 \verb|Other|
+        然后在 \verb|File -> New| 菜单选项中选择 \verb|Other|
         然后在对话框中找见 \verb|Board Support Package|
         创建板级支持包。
 
+        然后在向导中选择 \verb|standalone| 并创建板级支持包。
+        然后还是在 \verb|File -> New| 菜单中选择 \verb|Application|
+        创建 C语言 的 HelloWorld 工程，并选择之前创建的板级支持包。
+        
+        \subsubsection{编写软件}
+        
+        我们的 \verb|Hello World| 跨越过一堆坑之后，终于可以开始编写了。
+        在代码中编写：
+        
+        \begin{lstlisting}[language=C,caption=]
+#include <stdio.h>
+#include "platform.h"
 
+void print(char *str);
+
+int main()
+{
+    init_platform();
+
+    print("Hello World\n\r");
+    print("I was created on an unsuspecting world.\n\r");
+    cleanup_platform();
+
+    return 0;
+}
+        \end{lstlisting}
+
+        \subsubsection{配置上板}
+        
+        在代码保存之后，程序是自动编译的，因此至此所需要的文件基本都准备好了。
+        
+        \paragraph{链接串口}
+        
+        在之前设计硬件的部分是使用串口进行通信。在 Windows 上使用
+        PuTTY这个软件进行与 FPGA 开发板的通行。对于 macOS 或者 Linux
+        等 Unix类的系统则是使用 minicon 进行串口的链接。
+        
+        之前配置的是 波特率是 115200，则在配置中配置好。
+        
+        然后在JTAG 配置中，配置成 Diligent 的 USB。然后将
+        
+        
 \end{document}
