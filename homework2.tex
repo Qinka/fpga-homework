@@ -1,0 +1,149 @@
+\documentclass{ctexart}
+
+\usepackage{listings}
+
+\title{FPGA 作业 （II）}
+\author{李约瀚 \\ 14130140331 \\ qinka@live.com \\ qinka@qinka.pw}
+
+\lstset{breaklines}
+
+\begin{document}
+
+% Cover
+\thispagestyle{empty}
+\begin{center}
+  \vspace*{4em}
+  {\Huge\textbf{FPGA 作业 \\ \vspace*{0.5em} (II)}}
+  \vfill
+  \large
+  \begin{tabular}{c@{:}l}
+    班级 & 14113014 \\
+    学号 & 14130140331 \\
+    姓名 & 李约瀚 \\
+    教师 & 沈沛意 \\
+  \end{tabular}
+  \vspace*{4em}\\
+\end{center}
+\newpage
+
+\section{层次化工程创建}
+
+\subsection{实验目的}
+\begin{itemize}
+\item 熟悉简单逻辑门的RTL描述
+\item 创建简单电路的结构化描述
+\item 用 VHDL 创建层次结构描述
+\item 熟悉 ISE 集成环境中的 HDL 编辑器
+\end{itemize}
+
+
+\subsection{实验步骤}
+
+\begin{enumerate}
+\item 使用 ISE 创建新的工程
+\item 完成逻辑门的 RTL 描述
+\item 检查代码中的语法错误并生成原理图
+\end{enumerate}
+
+
+\subsection{报告正文}
+
+\subsubsection{创建一个新工程}
+
+打开 \verb|Xilinx ISE| 在文件中选择创建新的工程项目，并配置相对应的路径。
+点击下一步，然后配置与 Spartan-6 和开发版 Nexys3 有关的配置，然后并继续配置。
+
+\subsubsection{逻辑门的 RTL 描述}
+
+在工程中选择新建源码，并将其命名为 \verb|MY\_AND2.vhd|。然后为其输入代码：
+\begin{lstlisting}[language=VHDL]
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity my_and2 is
+    Port ( A : in  STD_LOGIC;
+           B : in  STD_LOGIC;
+           C : out  STD_LOGIC);
+end my_and2;
+
+architecture Behavioral of my_and2 is
+begin
+	C <= A and B;
+end Behavioral;
+\end{lstlisting}
+
+并通过同样的方式创建文件 \verb|MY_OR2.vhd|。然后输入代码：
+\begin{lstlisting}[language=VHDL]
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity my_or2 is
+    Port ( A : in  STD_LOGIC;
+           B : in  STD_LOGIC;
+           C : out  STD_LOGIC);
+end my_or2;
+
+architecture Behavioral of my_or2 is
+begin
+	C <= A or B;
+end Behavioral;
+\end{lstlisting}
+
+然后是文件 \verb|AND_OR.vhd|。并输入代码：
+\begin{lstlisting}[language=VHDL]
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity and_or is
+  Port ( INP: in STD_LOGIC_VECTOR(3 downto 0);
+           Z: out STD_LOGIC);
+end and_or;
+
+architecture Struct of and_or is
+  component my_and2
+    port( A: in  STD_LOGIC;
+          B: in  STD_LOGIC;
+          C: out STD_LOGIC);
+  end component;
+  component my_or2
+    port( A: in  STD_LOGIC;
+          B: in  STD_LOGIC;
+          C: out STD_LOGIC);
+  end component;
+
+signal s1,s2:STD_LOGIC;
+begin
+  U0: my_and2 port map (A => INP(0), B => INP(1), C => s1);
+  U1: my_and2 port map (A => INP(2), B => INP(3), C => s2);
+  U2: my_or2  port map (A => S1    , B => S2    , C => Z );
+end struct;
+\end{lstlisting}
+
+\subsubsection{语法检查并生成原理图}
+
+在 ISE 中选中顶层模块 AND\_OR，在 Proccess 中进行综合，在 Synthesize 中双击 
+\verb|Check Syntax| 检查语法。并修正有错误的语法。
+然后在选中 \verb|View RTL Schematic| 生成并查看原理图。
+
+
+\subsection{额外步骤}
+
+在配置检查原理图之后，为项目添加 约束文件，代码如下：
+\begin{lstlisting}
+
+\end{lstlisting}
+NET "INP[0]" LOC = T10;
+NET "INP[1]" LOC = T9;
+NET "INP[2]" LOC = V9;
+NET "INP[3]" LOC = M8;
+NET "Z" LOC = U16;
+
+NET "INP[3]" IOSTANDARD = LVCMOS33;
+NET "INP[2]" IOSTANDARD = LVCMOS33;
+NET "INP[1]" IOSTANDARD = LVCMOS33;
+NET "INP[0]" IOSTANDARD = LVCMOS33;
+NET "Z" IOSTANDARD = LVCMOS33;
+\end{document}
+
+将输入与波动开关绑定，然后输出绑定到LED灯。
+然后进行综合生成比特流文件，并配置到开发板上。拨动开关，然后观察结果。
