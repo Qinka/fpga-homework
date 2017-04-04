@@ -14,7 +14,7 @@
 \thispagestyle{empty}
 \begin{center}
   \vspace*{4em}
-  {\Huge\textbf{FPGA设计基础实验报告\\\vspace*{0.5em} （三）}}
+  {\Huge\textbf{FPGA设计基础实验报告\\\vspace*{0.5em} （四）}}
   \vfill
   \large
   \begin{tabular}{c@{：}l}
@@ -33,7 +33,7 @@
 
  % Exp 3-1
 
-\section{Xilinx 嵌入式下系统设计（III）}
+\section{Xilinx 嵌入式下系统设计（IV）}
         
 \subsection{实验目的}
 \begin{itemize}
@@ -60,20 +60,24 @@
 
 \subsubsection{系统机构与设计}
 
-系统完整的设计如图 \ref{fig:report3-1} 所示，其中本次实验的设计内容如图 \ref{fig:report4-1} 所示。
 \begin{figure}[h!]
-  \centering
-  \includegraphics[width=1\linewidth]{report3-1}
-  \caption{系统完整结构}
-  \label{fig:report3-1}
+    \centering
+    \includegraphics[width=1\linewidth]{report3-1}
+    \caption{系统完整结构}
+    \label{fig:report3-1}
 \end{figure}
+系统完整的设计如图 \ref{fig:report3-1} 所示，其中本次实验的设计内容如图 \ref{fig:report4-1} 所示。
 
-\begin{figure}
+
+\begin{figure}[h!]
 \centering
 \includegraphics[width=1\linewidth]{report4-1}
 \caption{本次试验的系统内容}
 \label{fig:report4-1}
 \end{figure}
+
+
+
 
 \subsubsection{自定义 IP 核}
 
@@ -216,9 +220,15 @@ Net "led_ip_0_LED_pin<7>" LOC = T11 |  IOSTANDARD = LVCMOS33;
         然后在JTAG 配置中，配置成 Diligent 的 USB。然后将之前生成好的文件通过
         \verb|Xilinx Tools -> Program FPGA|  中的选项配置好的比特流文件与生成的可执行的ELF文件，将其刷入 FPGA中。
 
-        然后在串口链接工具中可以看见输出的内容。
+        然后在串口链接工具中可以看见输出的内容，如图 \ref{fig:report4-2} 所示。
 
 
+\begin{figure}
+\centering
+\includegraphics[width=1\linewidth]{report4-2}
+\caption{串口输出内容}
+\label{fig:report4-2}
+\end{figure}
 
 
 \end{document}

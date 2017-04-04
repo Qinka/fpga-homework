@@ -1,0 +1,177 @@
+\documentclass{article}
+
+\usepackage{xeCJK}
+\setCJKmainfont{SimSun}
+
+\title{FPGA Homework III}
+\author{李约瀚 \\ 14130140331 \\ qinka@live.com \\ qinka@qinka.pw}
+
+\usepackage{listings}
+\usepackage{hyperref}
+
+\begin{document}
+    \maketitle
+    \newpage
+    \section{Get Started}
+    \label{sec:getstarted}
+    
+    For this homework, the best way to get a funny but valued VHDL project which can run on the Nexys, is search on the GitHub.
+    So I seach the key word \verb|Nexys3| and limit the language: \lstinline|language:VHDL|.
+    And then I find a repo is about play the game ``snake'' with Nexys3\footnote{\url{https://github.com/kaanege/snake-vhdl}}.
+    I forked that repo to my own, and using ISE to do the rest of things.
+    
+    \subsection{Clone and Create Prj}
+    \label{sec:cloneandcreateprj}
+    
+    The easiest thing to do is clone a repo, just using:
+    \begin{lstlisting}
+$ git clone git@github.com:Qinka/snake-vhdl.git
+    \end{lstlisting}
+    And then create an ISE project with the name \verb|FPGA-Snake|, and add the codes via ``coping''.
+    
+    Before whatever there are, the first thing to do without thinking is ``Synthesize XST''.
+    It cost a lot of time to synthesize this example.
+    
+    \section{Puzzle}
+    \label{sec:puzzle}
+    
+    Now, let we analyze how it does work.
+    
+    \subsection{Clock Unit}
+    \label{sec:clockunit}
+
+    First unit is clock unit, \verb|clock_divider.vhd|. This clock unit has two input pins and two output pins.
+    Input pins include a 100MHz clock input port and a reset port, which is used to reset the clock.
+    One of output pins can output a 25MHz clock signal, and other output port is a counter-down.
+    
+    The 100MHz clock is linked to peripheral clock, whose frequency is 100 MHz, too.
+    The reset port with it's signal will hold the clock, when reset signal is set up to 1.
+    When the reset signal turn over to 0, the clock will output the clock signal in the next cycle's rising edge.
+    
+    \subsection{VGA Unit}
+    \label{sec:vgaunit}
+    
+    VGA Unit is the part which send the video signals to screen. It has three input ports and seven output ports.
+    For input, there are some ports for reset signal, vga clock signal, and a port named \verb|borad_out|,
+    which means the context for outputs, including border, space, food,and the tails of the snake.
+    At the same times, it will output the vertical synchronous signal and horizontal synchronous signal,
+    as same as the signals about red, green, and blue.
+    
+    For each pixel, there should a clock rising edge(the signal), and the context about the type of this pixel.
+    It will send the sync-signal to screen, and at the same times, it will generate the red, green, and blue signals for
+    screen to display.
+    
+    We can change the color of the each kind of item, when not liking them.
+     
+    
+    \section{Pre-Simulation}
+    \label{sec:presimulation}
+    
+    This example do not provide test bench, so here, I need to write these test benches by myself.
+    
+    \subsection{Clock Unit}
+    \label{sec:ps:clockunit}
+    
+    To test, simulation and verification this unit, firstly, the test bench file is necessary.
+    Then we comment the processes for the \verb|clk25| and \verb|clkdeb|, beacuse these two processes
+    try to input a signal to a output register.
+    Then we need to create a process for reset signal and a constant var for reset signal period.
+    
+    Then the final test bench is:
+    \begin{lstlisting}[language=VHDL,caption=Clock Unit Test Bench]
+LIBRARY ieee;
+USE ieee.std_logic_1164.ALL;
+
+ENTITY tb_clock_divider IS
+END tb_clock_divider;
+
+ARCHITECTURE behavior OF tb_clock_divider IS 
+
+COMPONENT clock_divider
+    PORT(
+        clk100 : IN  std_logic;
+        reset  : IN  std_logic;
+        clk25  : OUT  std_logic;
+        clkdeb : OUT  std_logic
+    );
+END COMPONENT;
+
+-- input
+signal clk100 : std_logic := '0';
+signal reset  : std_logic := '0';
+--output
+signal clk25  : std_logic;
+signal clkdeb : std_logic;
+--constant
+constant clk100_period : time := 10  ns;
+constant clkdeb_period : time := 10  ns;
+constant rst_period_1  : time := 666 ns;
+BEGIN
+
+    uut: clock_divider PORT MAP (
+        clk100 => clk100,
+        reset  => reset,
+        clk25  => clk25,
+        clkdeb => clkdeb
+    );
+
+    clk100_process :process
+    begin
+        clk100 <= '0';
+        wait for clk100_period/2;
+        clk100 <= '1';
+        wait for clk100_period/2;
+    end process;
+
+    rst_process_1 : process
+    begin
+        reset <= '1';
+        wait for 10 ns;
+        reset <= '0';
+        wait for rst_period_1;
+        reset <= '1';
+        wait for 100 ns;
+        reset <= '0';
+        wait for 100 ms;
+    end process;
+
+    stim_proc: process
+    begin	
+        wait for 100 ns;	
+        wait for clk100_period*10;
+        wait;
+    end process;
+END;
+    \end{lstlisting}
+        
+    Then we can check behavioral syntax and simulate. Then we will get the output like figure \ref{fig:homework3-1},
+    figure \ref{fig:homework3-2}, and figure \ref{fig:homework3-3}.
+    
+    \begin{figure}[h]
+\centering
+\includegraphics[width=1\linewidth]{homework3-1}
+\caption{The Simulation of Clock Unit (1)}
+\label{fig:homework3-1}
+    \end{figure}
+    \begin{figure}[h]
+\centering
+\includegraphics[width=1\linewidth]{homework3-2}
+\caption{The Simulation of Clock Unit (2)}
+\label{fig:homework3-2}
+    \end{figure}
+    \begin{figure}[h]
+\centering
+\includegraphics[width=1\linewidth]{homework3-3}
+\caption{The Simulation of Clock Unit (3)}
+\label{fig:homework3-3}
+    \end{figure}
+
+    \subsection{VGA Unit}
+    \label{sec:ps:vgaunit}
+
+    There are two main input for this unit: clock and item. The clock is for VGA to sync, 
+    and item is to control what will be displayed.
+    So we input a 100MHz clock for VGA, and because it is just simulation,
+    
+    
+\end{document}
