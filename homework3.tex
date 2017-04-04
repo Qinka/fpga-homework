@@ -63,6 +63,16 @@ $ git clone git@github.com:Qinka/snake-vhdl.git
     
     We can change the color of the each kind of item, when not liking them.
      
+     \subsection{Game Logic Unit}
+     \label{sec:gamelogicunit}
+
+     Game logic unit is about to control game. There are eight input ports and two output ports. 
+     The two output are the reset signal when game was overm and the state signal when the state changed.
+     % ready,directioncheck,check,move,generatefood,game_over,vga
+     The states are included ``ready'', ``directioncheck'', ``check'', ``move'', ``generatefood'', ``game_over'' ,``vga''.
+
+     The input ports include clock signal, reset signal, direction signal, vertical sync-signal, random food, cell, and location. 6 5
+
     
     \section{Pre-Simulation}
     \label{sec:presimulation}
@@ -99,7 +109,7 @@ END COMPONENT;
 -- input
 signal clk100 : std_logic := '0';
 signal reset  : std_logic := '0';
---output
+[language=VHDL,caption=VGA]--output
 signal clk25  : std_logic;
 signal clkdeb : std_logic;
 --constant
@@ -148,22 +158,22 @@ END;
     figure \ref{fig:homework3-2}, and figure \ref{fig:homework3-3}.
     
     \begin{figure}[h]
-\centering
-\includegraphics[width=1\linewidth]{homework3-1}
-\caption{The Simulation of Clock Unit (1)}
-\label{fig:homework3-1}
+      \centering
+      \includegraphics[width=1\linewidth]{homework3-1}
+      \caption{The Simulation of Clock Unit (1)}
+      \label{fig:homework3-1}
     \end{figure}
     \begin{figure}[h]
-\centering
-\includegraphics[width=1\linewidth]{homework3-2}
-\caption{The Simulation of Clock Unit (2)}
-\label{fig:homework3-2}
+      \centering
+      \includegraphics[width=1\linewidth]{homework3-2}
+      \caption{The Simulation of Clock Unit (2)}
+      \label{fig:homework3-2}
     \end{figure}
     \begin{figure}[h]
-\centering
-\includegraphics[width=1\linewidth]{homework3-3}
-\caption{The Simulation of Clock Unit (3)}
-\label{fig:homework3-3}
+      \centering
+      \includegraphics[width=1\linewidth]{homework3-3}
+      \caption{The Simulation of Clock Unit (3)}
+      \label{fig:homework3-3}
     \end{figure}
 
     \subsection{VGA Unit}
@@ -171,7 +181,127 @@ END;
 
     There are two main input for this unit: clock and item. The clock is for VGA to sync, 
     and item is to control what will be displayed.
-    So we input a 100MHz clock for VGA, and because it is just simulation,
+    So we input a 100MHz clock for VGA, and because it is just simulation. And then we will input a signal for \verb|board_out|,
+    to display what a pixel, or say block, or box, is.
+
+    Just setting the clock signal turn over every 5 ns, and the signal of the \verb|board_out| will change in the range of
+    ``border'', ``space'', ``food'', and ``snake's tail''.The it will display what is going on.
+
+    And the final test bench file is like:
+\begin{lstlisting}[language=VHDL,caption=VGA Unit Test Bench]
+LIBRARY ieee;
+USE ieee.std_logic_1164.ALL;
+use work.game_package.all;
+
+ENTITY tb_vga IS
+END tb_vga;
+ 
+ARCHITECTURE behavior OF tb_vga IS 
+    COMPONENT vga
+    PORT(
+         reset : IN  std_logic;
+         vga_clk : IN  std_logic;
+         board_out : IN  cell_type;
+         vsync : OUT  std_logic;
+         hsync : OUT  std_logic;
+         red : OUT  std_logic_vector(2 downto 0);
+         green : OUT  std_logic_vector(2 downto 0);
+         blue : OUT  std_logic_vector(1 downto 0);
+         hor : OUT  integer range 0 to 799;
+         ver : OUT  integer range 0 to 520
+        );
+    END COMPONENT;
     
+   signal reset : std_logic := '0';
+   signal vga_clk : std_logic := '0';
+   signal board_out : cell_type := space;
+
+   signal vsync : std_logic;
+   signal hsync : std_logic;
+   signal red : std_logic_vector(2 downto 0);
+   signal green : std_logic_vector(2 downto 0);
+   signal blue : std_logic_vector(1 downto 0);
+   signal hor : integer range 0 to 799;
+   signal ver : integer range 0 to 520;
+
+   constant vga_clk_period : time := 10 ns;
+	constant board_period   : time := 10 ns;
+ 
+BEGIN
+   uut: vga PORT MAP (
+          reset => reset,
+          vga_clk => vga_clk,
+          board_out => board_out,
+          vsync => vsync,
+          hsync => hsync,
+          red => red,
+          green => green,
+          blue => blue,
+          hor => hor,
+          ver => ver
+        );
+
+   vga_clk_process :process
+   begin
+		vga_clk <= '0';
+		wait for vga_clk_period/2;
+		vga_clk <= '1';
+		wait for vga_clk_period/2;
+   end process;
+ 
+   board_process : process
+   begin
+	board_out <= space;
+	wait for board_period;
+	board_out <= border;
+	wait for board_period;
+	board_out <= food;
+	wait for board_period;
+	board_out <= snake_tail;
+	wait for board_period;
+   end process;
+
+   stim_proc: process
+   begin		
+	reset <= '1';
+	wait for 10 ns;
+	reset <= '0';
+        wait for 100 ns;	
+        wait for vga_clk_period*10;
+        wait;
+   end process;
+END;
+\end{lstlisting}
+
+    Then we can check behavioral syntax and simulate. Then we will get the output like  figure \ref{fig:homework3-4},
+    figure \ref{fig:homework3-5}, and  figure \ref{fig:homework3-6}.
+
+
+    \begin{figure}[h]
+      \centering
+      \includegraphics[width=1\linewidth]{homework3-4}
+      \caption{VGA Unit Simlulation (1)}
+      \label{fig:homework3-4}
+    \end{figure}
+
+    \begin{figure}[h]
+      \centering
+      \includegraphics[width=1\linewidth]{homework3-5}
+      \caption{VGA Unit Simulation (2)}
+      \label{fig:homework3-5}
+    \end{figure}
+
+
+    \begin{figure}
+      \centering
+      \includegraphics[width=1\linewidth]{homework3-6}
+      \caption{VGA Unit Simulation (3)}
+      \label{fig:homework3-6}
+    \end{figure}
+
+
+    \subsection{Game Logic Unit}
+    \label{sec:gamelogicunit}
+
     
 \end{document}
