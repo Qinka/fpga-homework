@@ -66,13 +66,16 @@ $ git clone git@github.com:Qinka/snake-vhdl.git
      \subsection{Game Logic Unit}
      \label{sec:gamelogicunit}
 
-     Game logic unit is about to control game. There are eight input ports and two output ports. 
-     The two output are the reset signal when game was overm and the state signal when the state changed.
+     Game logic unit is about to control game. There are seven input ports and three output ports. 
+     The two output are the reset signal when game was over and the state signal when the state changed.
      % ready,directioncheck,check,move,generatefood,game_over,vga
-     The states are included ``ready'', ``directioncheck'', ``check'', ``move'', ``generatefood'', ``game_over'' ,``vga''.
-
-     The input ports include clock signal, reset signal, direction signal, vertical sync-signal, random food, cell, and location. 6 5
-
+     The states are included ``ready'', ``direction check'', ``check'', ``move'',
+     ``generate food'', ``game over'' ,``vga''.
+     The input ports include clock signal, reset signal, direction signal, vertical sync-signal,
+     random food, cell, and location. 
+    
+    Game logic unit control the logic of the game, iut check the state of the game and it can 
+    be called as a state machine.
     
     \section{Pre-Simulation}
     \label{sec:presimulation}
@@ -302,6 +305,146 @@ END;
 
     \subsection{Game Logic Unit}
     \label{sec:gamelogicunit}
+
+    The hor, ver, and vsync signals are change with clock, and the direction will be change every 100ns. 
+    
+    Then this test bench's code are here:
+    \begin{lstlisting}[language=VHDL,caption=Game Logic Unit Test Bench]
+LIBRARY ieee;
+USE ieee.std_logic_1164.ALL;
+use work.game_package.all;
+
+ENTITY tb_game_logic IS
+END tb_game_logic;
+
+ARCHITECTURE behavior OF tb_game_logic IS 
+    COMPONENT game_logic
+    PORT(
+    clk : IN  std_logic;
+        reset : IN  std_logic;
+        direction : IN  std_logic_vector(1 downto 0);
+        random_food : in integer range 0 to 639;
+        vsync : IN  std_logic;
+        cell_out : out cell_type;
+        hor : in integer range 0 to 799;
+        ver : in integer range 0 to 520;
+        game_over_reset : OUT  std_logic;
+        current_game_state : out game_state
+    );
+END COMPONENT;
+
+signal clk : std_logic := '0';
+signal reset : std_logic := '0';
+signal direction : std_logic_vector(1 downto 0) := (others => '0');
+signal random_food : integer range 0 to 639 := 0;
+signal vsync : std_logic := '1';
+signal hor : integer range 0 to 799 := 0;
+signal ver : integer range 0 to 520 := 0;
+
+signal cell_out : cell_type;
+signal game_over_reset : std_logic;
+signal current_game_state : game_state;
+
+constant clk_period : time := 10 ns;
+constant vsync_period : time := 20 ns;
+constant direction_period : time := 400 ns;
+constant reset_signal_t : time := 200 ns;
+
+BEGIN
+    uut: game_logic PORT MAP (
+        clk => clk,
+        reset => reset,
+        direction => direction,
+        random_food => random_food,
+        vsync => vsync,
+        cell_out => cell_out,
+        hor => hor,
+        ver => ver,
+        game_over_reset => game_over_reset,
+        current_game_state => current_game_state
+    );
+    
+    clk_process :process
+    begin
+        clk <= '0';
+        wait for clk_period/2;
+        clk <= '1';
+        wait for clk_period/2;
+    end process;
+    
+    vsync_process : process
+    begin
+        wait until rising_edge(clk);
+        if vsync = '1' then
+            if hor < 799 then
+                hor <= hor + 1;
+            else
+                vsync <= '0';
+            end if;
+        else
+            if ver < 520 then
+                ver <= ver + 1;
+            else
+                ver <= 0;
+            end if;
+            wait for vsync_period;
+            hor <= 0;
+            vsync <= '1';
+        end if;
+    end process;
+    
+    direction_process : process
+    begin
+        direction <= "00";
+        wait for direction_period / 4;
+        direction <= "01";
+        wait for direction_period / 4;
+        direction <= "11";
+        wait for direction_period / 4;
+        direction <= "10";
+        wait for direction_period / 4;
+    end process;
+    
+    game_over_process : process
+    begin
+        wait until game_over_reset = '1';
+        reset <= game_over_reset;
+        wait for reset_signal_t;
+        wait until rising_edge(clk);
+        reset <= '0';
+    end process;
+    
+    stim_proc: process
+    begin		
+        wait for 100 ns;	
+        wait for clk_period*10;
+        wait;
+    end process;
+END;
+    \end{lstlisting}
+    
+    Then we can check behavioral syntax and simulate. Then we will get the output like 
+    figure \ref{fig:homework3-7}, figure \ref{fig:homework3-8}, and figure \ref{fig:homework3-9}.
+    
+    \begin{figure}[h]
+\centering
+\includegraphics[width=1\linewidth]{homework3-7}
+\caption{Game Logic Simulation (1)}
+\label{fig:homework3-7}
+\end{figure}
+\begin{figure}[h]
+\centering
+\includegraphics[width=1\linewidth]{homework3-8}
+\caption{Game Logic Simulation (2)}
+\label{fig:homework3-8}
+\end{figure}
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.7\linewidth]{homework3-9}
+\caption{Game Logic Simulation (3)}
+\label{fig:homework3-9}
+\end{figure}
+
 
     
 \end{document}
