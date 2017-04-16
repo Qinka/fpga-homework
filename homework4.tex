@@ -1,0 +1,27 @@
+\documentclass{article}
+
+\usepackage{xeCJK}
+\setCJKmainfont{SimSun}
+
+\title{FPGA Homework IV}
+\author{李约瀚 \\ 14130140331 \\ qinka@live.com \\ me@qinka.pro \\ qinka@qinka.pw(remove soon)}
+
+\usepackage{listings}
+\usepackage{hyperref}
+
+\begin{document}
+    \maketitle
+    \newpage
+    \tableofcontents
+    \newpage
+    \section{Summary}
+    \label{sec:summary}
+    
+    In this homework, I try to describe a one-bit comparator in VHDL.
+    I use both of \lstinline[language=VHDL]|xor| and with-select notation to represent a comparator. 
+    The delay of the one with with-select notation is short than ones which is using \lstinline[language=VHDL]|xor|. When the frequency of the input signals  are higher then 50MHz,
+    the delay of the one, which is using \lstinline[language=VHDL]|xor|, can not be ignored,
+    and it has effects on other signals. However, The one with with-select notation is well.
+    
+    
+\end{document}
