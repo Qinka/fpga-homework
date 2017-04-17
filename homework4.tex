@@ -78,8 +78,9 @@ end with_one;
 \end{lstlisting}
 
 
-    \section{Behavioral Simulation}
-    \label{sec:behavioralsimulation}
+
+    \section{Test Bench}
+    \label{sec:testbench}
 
     Here I need to simulate the two of the comparator, so I write one test bench with the both of the kinds of comparator.
 
@@ -175,5 +176,76 @@ end WHICHONE;
 
 
 
+
+    \section{Behavioral Simulation}
+    \label{sec:behavioralsimulation}
+    
+    In the ISE, I just run the behavioral simulation with ISim, and the result of the simulation
+    is the figure \ref{fig:homework4-1}. From the figure, the behavioral simulation is looked right.
+    That is just what I want.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=1\linewidth]{homework4-1}
+\caption{Behavioral Simulation (1)}
+\label{fig:homework4-1}
+\end{figure}
+
+    \section{RTL Schematic}
+    \label{sec:rtlschematic}
+    
+    For RTL Schematic, the top level schematic is just like figure \ref{fig:homework4-2}.
+    And the lower level of the schematic of both RTL and Technology are just like figure \ref{fig:homework4-3}, and figure \ref{fig:homework4-4}.
+    
+\begin{figure}[h!]
+\centering
+\includegraphics[width=1\linewidth]{homework4-2}
+\caption{Top Level of RTL Schematic}
+\label{fig:homework4-2}
+\end{figure}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=1\linewidth]{homework4-3}
+\caption{Lower Level of RTL Schematic}
+\label{fig:homework4-3}
+\end{figure}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=1\linewidth]{homework4-4}
+\caption{Lower Level of Technology Schematic}
+\label{fig:homework4-4}
+\end{figure}
+
+
+    \section{Post-Route Simulation}
+    \label{sec:postroutesimulation}
+    
+    After placing and routing, the delay of the signal can not be ignore.
+    Sometime we might need to reroute or replace when the delay has the bad effect on the signal or
+    the circuit.
+    
+    Back to my comparator, unfortunately, the one using xor can not work because of the delay.
+    In the figure \ref{fig:homework4-5}, the delay is almost inacceptable, and its frequency is just 50MHz. When the 100MHz of the input signals' frequency, delay of the signal can not be
+    accepted, as the figure \ref{fig:homework4-6}. The signal is also unstable.
+    
+\begin{figure}[h!]
+\centering
+\includegraphics[width=1\linewidth]{homework4-5}
+\caption{The Delay of Signals (50MHz)}
+\label{fig:homework4-5}
+\end{figure}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=1\linewidth]{homework4-6}
+\caption{The Delay of Signals (100MHz)}
+\label{fig:homework4-6}
+\end{figure}
+
+    For the one with with-select notation, the delay is almost zero, and has any difference with
+    the behavioral simulation. 
+    
    
 \end{document}
