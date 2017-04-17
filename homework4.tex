@@ -121,7 +121,7 @@ ARCHITECTURE behavior OF tb_comparator IS
   constant clock_period : time := 20 ns;
 \end{lstlisting}
 
-   Instantiate the unit under test
+   Instantiate the unit under test.
 
 \begin{lstlisting}[language=VHDL]
 BEGIN
@@ -136,5 +136,44 @@ BEGIN
           C => C(1)
         );
 \end{lstlisting}
-    
+
+   The main process for the simulation is the following.
+
+\begin{lstlisting}[language=VHDL]
+  stim_proc: process
+  begin		
+	A <= '0';
+	B <= '0';
+	wait for clock_period;
+	A <= '0';
+	B <= '1';
+	wait for clock_period;
+	A <= '1';
+	B <= '0';
+	wait for clock_period;
+	A <= '1';
+	B <= '1';
+	wait for clock_period;
+  end process;
+end behavior;
+\end{lstlisting}
+
+   Then I need to configurate them.
+
+\begin{lstlisting}[language=VHDL]
+configuration WHICHONE of tb_comparator is
+	for behavior
+		for uut_xor: comparator
+			use entity Work.comparator(xor_one);
+		end for;
+		for uut_with: comparator
+			use entity Work.comparator(with_one);
+		end for;
+	end for;
+end WHICHONE;
+\end{lstlisting}
+
+
+
+   
 \end{document}
