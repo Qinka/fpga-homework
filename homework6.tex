@@ -1,0 +1,117 @@
+\documentclass{article}
+%
+\usepackage{xeCJK}
+\setCJKmainfont{SimSun}
+%
+\title{FPGA Homework VI}
+\author{李约瀚 \\ 14130140331 \\ qinka@live.com \\ me@qinka.pro}
+
+\usepackage{listings}
+\usepackage{hyperref}
+
+\begin{document}
+    \maketitle
+    \newpage
+    \tableofcontents
+    \newpage
+    
+    \section{Summary}
+    \label{sec:summary}
+    
+    This homework is about create a 4-bit ALU\footnote{Arithmetic Logical Unit} with very simple functions.
+    Such a ALU can compute the 4-bit numbers' operation.
+    At the same time, in this report, there are also behavior simulation, post-route simulation, the report about resources,
+    and the highest frequency of the clock which are found out via test.
+    
+    \section{``Plan''}
+    \label{sec:plan}
+    
+    For such a ALU, it should be about to compute the sum or the difference of two numbers with carry or not.
+    The ALU also shoule has the functions such as \verb|and|, \verb|or|, \verb|xor| and \verb|not|.
+    
+    So the following is the functions and the corresponding options.
+    
+    \begin{table}[h!]
+        \centering
+        \begin{tabular}{|c|c|}
+            \hline Function & Operation \\ 
+            \hline Transfer A(input) & $Y \Leftarrow A$ \\ 
+            \hline Increase & $ Y \Leftarrow A + 1$ \\ 
+            \hline Add with carry & $Y \Leftarrow A + B + C_{in}$ \\ 
+            \hline Add with complement(B)  & $Y \Leftarrow A + (not\,B)$ \\ 
+            \hline Sub & $Y \Leftarrow A +(not\,B) + 1$ \\
+            \hline Decrease & $ Y \Leftarrow A - 1$ \\
+            \hline \verb|and| & $ Y \Leftarrow A\,and\,B $ \\
+            \hline \verb|or|  & $ Y \Leftarrow A\,or\,B $ \\
+            \hline \verb|xor| & $ Y \Leftarrow A\,xor\,B $ \\
+            \hline \verb|not| & $ Y \Leftarrow not\,A$ \\
+            \hline Passing the \verb|zero| & $ Y \Leftarrow 0 $\\
+            \hline
+        \end{tabular} 
+        \caption{The functions and operations of ALU}
+        \label{tab:alu:fno}
+    \end{table}
+    
+    In the matter of the ALU's peripheral characters,
+    such ALU need two 4-bit input ports which are used to input operated numbers,
+    one bit input port for carry, one bit input port for clock,
+    one bit input port for enabling, a 4-bit input port for operation, and a 4-bit output port for output(result).
+    
+    Then the port are defined in the following.
+    \begin{table}
+        \centering
+        \begin{tabular}{|c|c|c|c|}
+            \hline Function & Port's Name & Bandwidth & Direction \\
+            \hline result             & Y        & 4 bits & out \\
+            \hline operated number I  & A        & 4 bits & in \\
+            \hline operated number II & B        & 4 bits & in \\
+            \hline operation code     & OP\_CODE & 4 bits & in \\
+            \hline clock              & CLK      & 1 bit  & in \\
+            \hline enable             & EN       & 1 bit  & in \\
+            \hline carry              & C\_IN    & 1 bit  & in \\
+            \hline
+        \end{tabular}
+        \caption{The ports for the ALU}
+        \label{tab:alu:port}
+    \end{table}
+    
+    \section{Design}
+    \label{sec:design}
+    
+    \subsection{Operation Codes}
+    \label{sec:desgin:code}
+    
+    So we need to design the codes of operations which will operate ALU to do particular operation.
+    Some operations are connected to carry-in, so some operations will has the same code but distinguish with carry-in.
+    
+    \begin{table}
+        \centering
+        \begin{tabular}{|c|c|c|}
+            \hline Operation Code & Carry & Operation \\ 
+            \hline "0000" & 0 & $ Y \Leftarrow A$ \\ 
+            \hline "0000" & 1 & $ Y \Leftarrow A + 1$ \\ 
+            \hline "0001" & 0 & $ Y \Leftarrow A + B $ \\ 
+            \hline "0001" & 1 & $ Y \Leftarrow A + B + 1 $ \\ 
+            \hline "0010" & 0 & $ Y \Leftarrow A + (not\,B)$ \\ 
+            \hline "0010" & 1 & $ Y \Leftarrow A +(not\,B) + 1$ \\
+            \hline "0011" & 0 & $ Y \Leftarrow A - 1$ \\
+            \hline "0011" & 1 & $ Y \Leftarrow A$ \\ 
+            \hline "0100" & 0 & $ Y \Leftarrow A\,and\,B $ \\
+            \hline "0100" & 1 & $ Y \Leftarrow A\,or\,B $ \\
+            \hline "0101" & 0 & $ Y \Leftarrow A\,xor\,B $ \\
+            \hline "0101" & 1 & $ Y \Leftarrow A\,xnor\,B$ \\
+            \hline "0110" & 0 & $ Y \Leftarrow not\,A$ \\
+            \hline "0110" & 1 & $ Y \Leftarrow 0 $\\
+            \hline
+        \end{tabular}
+        \caption{The operation code of ALU}
+        \label{tab:alu:code}
+    \end{table} 
+    
+    And the "1???" and "0111" are reserved.
+    
+    
+    Then I can write the VHDL source.
+    
+    
+\end{document}
