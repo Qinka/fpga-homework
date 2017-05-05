@@ -3,7 +3,12 @@
 \usepackage{xeCJK}
 \setCJKmainfont{SimSun}
 %
-\title{FPGA Homework VI}
+\title{FPGA Homework VI\thanks{%
+        This homework report is source-opened on
+        \href{https://github.com/Qinka/fgpa-homework}{GitHub:Qinka/fpga-homework}.
+        Because one of my friend's Java homework, which is also opened on GitHub, was plagiarized by others, I just want declare the my, 李约瀚, copyleft(right) of the report of my homework.
+        I, John Lee, is the only writer of this report.
+        }}
 \author{李约瀚 \\ 14130140331 \\ qinka@live.com \\ me@qinka.pro}
 
 \usepackage{listings}
@@ -22,7 +27,7 @@
     Such a ALU can compute the 4-bit numbers' operation.
     At the same time, in this report, there are also behavior simulation, post-route simulation, the report about resources,
     and the highest frequency of the clock which are found out via test.
-    As was expected, the highest frequency of the both is about 100MHz, but I will say that is 50MHz or lower.
+    As was expected, the highest frequency of the both is about 100MHz, in fact 166.66MHz, but I will say that is 50MHz or lower.
     
     \section{``Plan''}
     \label{sec:plan}
@@ -402,7 +407,8 @@ END;
       The highest frequency of the both kinds of the ALU is 100MHz, but that might be unstable.
       The delays of the signal is about 6 ns, for both two kinds ALU.
       So the frenquency of the highest about $$100MHz \times \frac{10}{6} = \frac{500}{3}$$
-      is about $166.66MHz$.    
+      is about $166.66MHz$. But I still think that when the ALU works stably, the frequency of the clock should be
+      lower than 50MHz, whose period is 20ns.
       So the stable highest frequency of the kinds of the ALU is 50MHz, half of the 100Mhz.
       And the uesr might has the change to overclock.
 
@@ -427,5 +433,48 @@ END;
 
     The RTL schematics of the ALU are the figure \ref{fig:homework6-8} and the figure \ref{fig:homework6-7}.
     
+    The following tables is the \textit{Device Utilization Summary} of the ALUs, for \ref{tab:rtl:cw} and \ref{tab:rtl:ws}.
+    \begin{table}[h!]
+        \centering
+        \begin{tabular}{|l|r|r|r|}
+            \hline Slice Logic Utilization & Used & Available & Utilization \\ 
+            \hline Number of Slice Registers & 0
+            & 18,224
+            & 0\%
+            \\ 
+            \hline Number of Slice LUTs & 23
+            & 9,112
+            & 1\% \\ 
+            \hline Number of occupied Slices & 10
+            & 2,278 & 1\%
+            \\ 
+            \hline Number of LUT Flip Flop pairs used & 23
+            &  &  \\ 
+            \hline Number of bonded IOBs & 17
+            & 232
+            &  \\ 
+            \hline Average Fanout of Non-Clock Nets & 3.42
+            &  &  \\ 
+            \hline 
+        \end{tabular} 
+        \caption{Device Utilization Summary of the ALU with case-when notion}
+        \label{tab:rtl:cw}
+    \end{table}
+    \begin{table}[h!]
+        \centering
+        \begin{tabular}{|l|r|r|r|}
+            \hline Slice Logic Utilization & Used & Available & Available \\ 
+            \hline Number of Slice Registers & 0 & 18,224 & 0\% \\ 
+            \hline Number of Slice LUTs & 23 & 9,112 & 1\% \\ 
+            \hline Number of occupied Slices & 10 & 2,278 & 1\% \\ 
+            \hline Number of MUXCYs used & 0 & 4,556 & 0\% \\ 
+            \hline Number of bonded IOBs & 17 & 232 & 7\% \\ 
+            \hline Average Fanout of Non-Clock Nets & 3.42
+            &  &  \\ 
+            \hline 
+        \end{tabular} 
+        \caption{Device Utilization Summary of the ALU with with-select notion}
+        \label{tab:rtl:ws}
+    \end{table}
    
 \end{document}
