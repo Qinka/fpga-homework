@@ -27,6 +27,17 @@
     \section{Summary}
     \label{sec:summary}
     
+    In this report of \textit{Homework VII}, there are practices in the text book, which is about a state machine and a counter,
+    and design with instance, which is about the turnstile's instance with VHDL. In the practice of state machine, 
+    the design has already done, and even the VHDL codes. So I combine them to simulate such a state machine on \textbf{ISim},
+    and I got into trouble, when do post-route simulation, because of the ISE will not compiler the self-defined library, and
+    resolution the record \textbf{\textit{MY\_RECORD}} to the basic types. After rewrite the rule of the compiling and 
+    the test bench. The post-route simulation was done. In the practice of counter, I combine the codes of the other practices,
+    and verified the behavior simulation and post-route simulation. For both of two practices, I test, or say find out,
+    the highest frequencies of the circles. For the turnstile one, I design and instance one turnstile, and try to solve the
+    competition of the putting and push signals. Then do the behavior simulation.
+    
+    
     \section{Pratice of State Machine}
     \label{sec:p:sm}
     
@@ -664,4 +675,201 @@ END architecture TEST;
     
     The table \ref{tab:c:dus} is the device utilization summary.
     
+    
+    
+    
+    \section{Practice of Turnstile}
+    \label{sec:turnstile}
+    
+    \subsection{Design}
+    \label{sec:turnstile:design}
+    
+    The turnstile is a small gate that spins around and only lets one person at a time go through an entrance%
+    \footnote{Page 1901, \textit{Longman Dictionary of Contemporary English(New Edition)}, \textcopyright Pearson Education Limited, 1978,2009}.
+    There are just two main actions: put in the coin and push the gate. So the state of turnstile should has two: locked
+    and unlocked.
+    Then the general state transition table will be table \ref{tab:tuenstile:state_transition}.
+    \begin{table}[h!]
+        \centering
+        \begin{tabular}{|c|c|c|c|}
+            \hline Current State & Stimulation & Next State & Note \\ 
+            \hline Unlocked & putting coin & Unlocked & refuse the coin \\ 
+            \hline Unlocked & pushing & Locked &  \\ 
+            \hline Locked & putting coin & Unlocked &  \\ 
+            \hline Locked & pushing & Locked & refuse the ``pushing'' \\ 
+            \hline 
+        \end{tabular}
+        \caption{State Transition Table of Turnstile}
+        \label{tab:tuenstile:state_transition}
+    \end{table}
+    
+    With such a table, the graph of the state transition can be draw, and it is figure.
+    
+    \begin{figure}[h!]
+        \centering
+        \begin{tikzpicture}[node distance=3cm,>=stealth',bend angle=20,auto]
+            \tikzstyle{state}=[rectangle,thick,draw=blue!75,fill=blue!20,minimum size=8mm]
+            \tikzstyle{signal}=[circle,thick,draw=green!75,fill=green!20,minimum size=6mm]
+            \begin{scope}
+            \node[state](locked){Locked};
+            \node[state,below of=locked](unlocked){Unlocked};
+            \node[signal,above of=locked](lockpush){Push}
+                edge [pre,bend left] (locked)
+                edge [post,bend right] (locked);
+            \node[signal,below of=unlocked,align=center](unlockcoin){Put\\coin in}
+                edge [pre,bend left] (unlocked)
+                edge [post,bend right] (unlocked);
+            \node[signal,below of=locked,left of=locked,align=center](lockcoin){Put\\coin in}
+                edge [pre] (locked)
+                edge [post] (unlocked);
+            \node[signal,above of=unlocked,right of=unlocked](unlockpush){Push}
+                edge [post] (locked)
+                edge [pre] (unlocked);
+            \end{scope}        
+        \end{tikzpicture}
+        \caption{State Transition Graph of Turnstile}
+    \end{figure}
+    
+    So the input of turnstile has two signals: ``push'' and ``put coin in'', and the output signal is the state of turnstile.
+    
+    \subsection{Instance}
+    \label{sec:turnstile:instance}
+    
+    To prevent the competition of signals, which are about pushing, and putting coin in, we need a clock signal to be arbiter. When clock signal rising,
+    the signal for putting coin in is valid, and when clock signal falling,
+    the signal for pushing is valid.
+    The two input signals and the clock signal are combined to represent the state.
+    And the following are the codes.
+    
+    \begin{lstlisting}[language=VHDL,caption=Turnstile Codes]
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity turnstile is
+    Port ( coin : in  STD_LOGIC;
+        push : in  STD_LOGIC;
+        clock : in STD_LOGIC; -- 1 coin; 0 push
+        lock : out  STD_LOGIC := '0'); -- 1 unlock
+end turnstile;
+
+architecture Behavioral of turnstile is
+    signal state : STD_LOGIC_VECTOR(2 downto 0);
+    signal lock_reg : STD_LOGIC := '0';
+begin
+    state <= coin & push & clock;
+    lock <= lock_reg;
+    process (clock)
+    begin
+        case state is
+            when "111" => 
+                lock_reg <= '1';
+            when "110" =>
+                lock_reg <= '0';
+            when "101" =>
+                lock_reg <= '1';
+            when "010" =>
+                lock_reg <= '0';
+            when others =>
+                lock_reg <= lock_reg;
+        end case;
+    end process;
+end Behavioral;
+    \end{lstlisting}
+    
+    \subsection{Behavior Simulation}
+    
+    So the turnstile will be test with these situations:
+    \begin{itemize}
+        \item no input signal
+        \item put coin in when locked
+        \item put coin in when unlocked
+        \item push gate when locked
+        \item push gate when unlocked
+        \item put coin in and push gate at the same time when locked
+        \item put coin in and push gate at the same time when unlocked
+    \end{itemize}
+    
+    The test bench is the following codes.
+    
+    \begin{lstlisting}[language=VHDL,caption=Turnstile Test Bench]
+LIBRARY ieee;
+USE ieee.std_logic_1164.ALL;
+
+ENTITY turnstile_tb IS
+END turnstile_tb;
+ARCHITECTURE behavior OF turnstile_tb IS 
+    COMPONENT turnstile
+        PORT(
+            coin : IN  std_logic;
+            push : IN  std_logic;
+            clock : IN  std_logic;
+            lock : OUT  std_logic
+            );
+    END COMPONENT;
+    signal coin : std_logic := '0';
+    signal push : std_logic := '0';
+    signal clock : std_logic := '0';
+    signal lock : std_logic;
+    constant clock_period : time := 10 ns;
+BEGIN
+    uut: turnstile PORT MAP (
+        coin => coin,
+        push => push,
+        clock => clock,
+        lock => lock
+        );
+    clock_process :process
+    begin
+        clock <= '0';
+        wait for clock_period/2;
+        clock <= '1';
+        wait for clock_period/2;
+    end process;
+    stim_proc: process
+    begin
+        wait for clock_period*9;
+        push <= '1';
+        wait for clock_period*2;
+        push <= '0';
+        coin <= '1';
+        wait for clock_period*2;
+        coin <= '0';
+        wait for clock_period*2;
+        coin <= '1';
+        wait for clock_period*2;
+        coin <= '0';
+        push <= '1';
+        wait for clock_period*2;
+        coin <= '1';
+        wait for clock_period*2;
+        coin <= '0';
+        push <= '0';
+    end process;
+END;
+
+    \end{lstlisting}
+   
+   \begin{figure}[h]
+        \centering
+        \includegraphics[width=1\linewidth]{homework7-9}
+        \caption{Result of Turnstile's Behavior Simulation (1)}
+        \label{fig:homework7-9}
+    \end{figure}
+
+    \begin{figure}[h]
+        \centering
+        \includegraphics[width=1\linewidth]{homework7-10}
+        \caption{Result of Turnstile's Behavior Simulation}
+        \label{fig:homework7-10}
+    \end{figure}
+    
+    The results of simulation are figure \ref{fig:homework7-9} and figure \ref{fig:homework7-10}.
+    
+    \subsection{Analyze}
+    
+    Such a turnstile has a disadvantage. Clock's frequency is sensitive.
+    When clock frequency is high and two input signal arrived, the state of the
+    turnstile will also turn over in a high frequency, but when clock's frequency
+    is lower, and the responding will be lower too.
+            
 \end{document}
